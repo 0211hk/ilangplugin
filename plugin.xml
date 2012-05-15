@@ -5,12 +5,12 @@
    <extension
          point="org.eclipse.ui.editors">
       <editor
-            name="Sample XML Editor"
-            extensions="xml"
-            icon="icons/sample.gif"
+            class="org.hk.io.language.plugin.editors.IoEditor"
             contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
-            class="org.hk.io.language.plugin.editors.XMLEditor"
-            id="org.hk.io.language.plugin.editors.XMLEditor">
+            extensions="io"
+            icon="icons/sample.gif"
+            id="org.hk.io.language.plugin.editors.IoEditor"
+            name="IoLanguageEditor">
       </editor>
    </extension>
 

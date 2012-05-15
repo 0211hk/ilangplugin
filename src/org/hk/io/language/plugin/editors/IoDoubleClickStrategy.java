@@ -2,7 +2,7 @@ package org.hk.io.language.plugin.editors;
 
 import org.eclipse.jface.text.*;
 
-public class XMLDoubleClickStrategy implements ITextDoubleClickStrategy {
+public class IoDoubleClickStrategy implements ITextDoubleClickStrategy {
 	protected ITextViewer fText;
 
 	public void doubleClicked(ITextViewer part) {
