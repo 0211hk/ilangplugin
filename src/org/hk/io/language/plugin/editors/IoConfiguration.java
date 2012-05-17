@@ -37,7 +37,7 @@ public class IoConfiguration extends SourceViewerConfiguration {
 		if (ioScanner == null) {
 			ioScanner = new IoScanner(colorManager);
 			ioScanner.setDefaultReturnToken(new Token(new TextAttribute(
-					colorManager.getColor(IIoColorConstants.TYPE))));
+					colorManager.getColor(IIoColorConstants.KEYWORD))));
 		}
 		return ioScanner;
 	}

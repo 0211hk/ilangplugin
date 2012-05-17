@@ -6,7 +6,6 @@ import org.eclipse.jface.text.rules.IToken;
 import org.eclipse.jface.text.rules.IWordDetector;
 import org.eclipse.jface.text.rules.RuleBasedScanner;
 import org.eclipse.jface.text.rules.Token;
-import org.eclipse.jface.text.rules.WordRule;
 
 public class IoScanner extends RuleBasedScanner {
 
@@ -24,22 +23,23 @@ public class IoScanner extends RuleBasedScanner {
 			"super", "system", "then", "thisBlock", "thisContext", "call",
 			"try", "type", "uniqueId", "updateSlot", "wait", "while", "write",
 			"yield" };
-	private final static String TYPES[] = new String[] { "Array", "AudioDevice",
-		"AudioMixer", "Block", "Box", "Buffer", "CFunction", "CGI",
-		"Color", "Curses", "DBM", "DNSResolver", "DOConnection", "DOProxy",
-		"DOServer", "Date", "Directory", "Duration", "DynLib", "Error",
-		"Exception", "FFT", "File", "Fnmatch", "Font", "Future", "GL",
-		"GLE", "GLScissor", "GLU", "GLUCylinder", "GLUQuadric",
-		"GLUSphere", "GLUT", "Host", "Image", "Importer", "LinkList",
-		"List", "Lobby", "Locals", "MD5", "MP3Decoder", "MP3Encoder",
-		"Map", "Message", "Movie", "Notification", "Number", "Object",
-		"OpenGL", "Point", "Protos", "Regex", "SGML", "SGMLElement",
-		"SGMLParser", "SQLite", "Server", "Sequence", "ShowMessage",
-		"SleepyCat", "SleepyCatCursor", "Socket", "SocketManager", "Sound",
-		"Soup", "Store", "String", "Tree", "UDPSender", "UPDReceiver",
-		"URL", "User", "Warning", "WeakLink", "true", "false", "nil",
-		"Random", "BigNum", "Sequence" };
-	
+
+	private final static String TYPES[] = new String[] { "Array",
+			"AudioDevice", "AudioMixer", "Block", "Box", "Buffer", "CFunction",
+			"CGI", "Color", "Curses", "DBM", "DNSResolver", "DOConnection",
+			"DOProxy", "DOServer", "Date", "Directory", "Duration", "DynLib",
+			"Error", "Exception", "FFT", "File", "Fnmatch", "Font", "Future",
+			"GL", "GLE", "GLScissor", "GLU", "GLUCylinder", "GLUQuadric",
+			"GLUSphere", "GLUT", "Host", "Image", "Importer", "LinkList",
+			"List", "Lobby", "Locals", "MD5", "MP3Decoder", "MP3Encoder",
+			"Map", "Message", "Movie", "Notification", "Number", "Object",
+			"OpenGL", "Point", "Protos", "Regex", "SGML", "SGMLElement",
+			"SGMLParser", "SQLite", "Server", "Sequence", "ShowMessage",
+			"SleepyCat", "SleepyCatCursor", "Socket", "SocketManager", "Sound",
+			"Soup", "Store", "String", "Tree", "UDPSender", "UPDReceiver",
+			"URL", "User", "Warning", "WeakLink", "true", "false", "nil",
+			"Random", "BigNum", "Sequence" };
+
 	static class WordDetector implements IWordDetector {
 
 		public final boolean isWordPart(char c) {
@@ -50,24 +50,26 @@ public class IoScanner extends RuleBasedScanner {
 			return Character.isJavaIdentifierStart(c);
 		}
 	}
-	
-	public IoScanner(ColorManager manager) {
-		IToken string = new Token(new TextAttribute(
-				manager.getColor(IIoColorConstants.KEYWORD)));
 
-		final WordRule w = new WordRule(new WordDetector(), string);
+	public IoScanner(ColorManager manager) {
+		IToken token = new Token(new TextAttribute(
+				manager.getColor(IIoColorConstants.KEYWORD)));
+		IToken defaultToken = new Token(new TextAttribute(
+				manager.getColor(IIoColorConstants.DEFAULT)));
+
+		CombinedWordRule.WordMatcher wordRule = new CombinedWordRule.WordMatcher();
 		for (final String k : KEY_WORDS) {
-			w.addWord(k, string);
-			w.addWord(k.toUpperCase(), string);
+			wordRule.addWord(k, token);
 		}
-		
+
 		for (final String k : TYPES) {
-			w.addWord(k, string);
-			w.addWord(k.toUpperCase(), string);
+			wordRule.addWord(k, token);
 		}
-		
+		CombinedWordRule combinedWordRule = new CombinedWordRule(
+				new WordDetector(), defaultToken);
+		combinedWordRule.addWordMatcher(wordRule);
 		IRule[] rules = new IRule[1];
-		rules[0] = w;
+		rules[0] = combinedWordRule;
 		setRules(rules);
 	}
 }
