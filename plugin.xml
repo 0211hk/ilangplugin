@@ -8,7 +8,7 @@
             class="org.hk.io.language.plugin.editors.IoEditor"
             contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
             extensions="io"
-            icon="icons/sample.gif"
+            icon="icons/io_obj.gif"
             id="org.hk.io.language.plugin.editors.IoEditor"
             name="IoLanguageEditor">
       </editor>
@@ -16,19 +16,67 @@
    <extension
          point="org.eclipse.ui.preferencePages">
       <page
-            class="ilangplugin.preferences.SamplePreferencePage"
-            id="ilangplugin.preferences.SamplePreferencePage"
-            name="Sample Preferences">
+            class="org.hk.io.language.plugin.preferences.IoPreferencePage"
+            id="org.hk.io.language.plugin.preferences.IoPreferencePage"
+            name="io">
       </page>
    </extension>
    <extension
          point="org.eclipse.core.runtime.preferences">
       <initializer
-            class="ilangplugin.preferences.PreferenceInitializer">
+            class="org.hk.io.language.plugin.preferences.PreferenceInitializer">
       </initializer>
    </extension>
    <extension
-         point="org.eclipse.core.runtime.preferences">
+         id="IlanguageBuilder"
+         name="Io Project Builder"
+         point="org.eclipse.core.resources.builders">
+      <builder
+            hasNature="true">
+         <run
+               class="ilangplugin.builder.IoBuilder">
+         </run>
+      </builder>
+   </extension>
+   <extension
+         id="IlanguageNature"
+         name="io Project Nature"
+         point="org.eclipse.core.resources.natures">
+      <runtime>
+         <run
+               class="ilangplugin.builder.IoNature">
+         </run>
+      </runtime>
+      <builder
+            id="ilangplugin.IlanguageBuilder">
+      </builder>
+   </extension>
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            adaptable="true"
+            id="ilangplugin.contribution1"
+            nameFilter="*"
+            objectClass="org.eclipse.core.resources.IProject">
+         <action
+               class="ilangplugin.builder.ToggleNatureAction"
+               enablesFor="+"
+               id="ilangplugin.addRemoveNatureAction"
+               label="Add/Remove Sample Nature"
+               menubarPath="additions">
+         </action>
+      </objectContribution>
+   </extension>
+   <extension
+         id="xmlProblem"
+         name="XML Problem"
+         point="org.eclipse.core.resources.markers">
+      <super
+            type="org.eclipse.core.resources.problemmarker">
+      </super>
+      <persistent
+            value="true">
+      </persistent>
    </extension>
 
 </plugin>
