@@ -78,5 +78,13 @@
             value="true">
       </persistent>
    </extension>
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <wizard
+            class="org.hk.io.language.plugin.wizard.NewWizard"
+            id="org.hk.io.language.plugin.wizard"
+            name="io">
+      </wizard>
+   </extension>
 
 </plugin>

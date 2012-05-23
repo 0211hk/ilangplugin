@@ -1,5 +1,9 @@
 package ilangplugin.builder;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -22,42 +26,35 @@ import org.xml.sax.helpers.DefaultHandler;
 
 public class IoBuilder extends IncrementalProjectBuilder {
 
-	class SampleDeltaVisitor implements IResourceDeltaVisitor {
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.eclipse.core.resources.IResourceDeltaVisitor#visit(org.eclipse.core.resources.IResourceDelta)
-		 */
+	class IoDeltaVisitor implements IResourceDeltaVisitor {
+		@Override
 		public boolean visit(IResourceDelta delta) throws CoreException {
 			IResource resource = delta.getResource();
 			switch (delta.getKind()) {
 			case IResourceDelta.ADDED:
-				// handle added resource
-				checkXML(resource);
+				checkIo(resource);
 				break;
 			case IResourceDelta.REMOVED:
-				// handle removed resource
 				break;
 			case IResourceDelta.CHANGED:
-				// handle changed resource
-				checkXML(resource);
+				checkIo(resource);
 				break;
 			}
-			//return true to continue visiting children.
+			// return true to continue visiting children.
 			return true;
 		}
 	}
 
-	class SampleResourceVisitor implements IResourceVisitor {
+	class IoResourceVisitor implements IResourceVisitor {
 		public boolean visit(IResource resource) {
-			checkXML(resource);
-			//return true to continue visiting children.
+			checkIo(resource);
+			// return true to continue visiting children.
 			return true;
 		}
 	}
 
 	class XMLErrorHandler extends DefaultHandler {
-		
+
 		private IFile file;
 
 		public XMLErrorHandler(IFile file) {
@@ -65,8 +62,8 @@ public class IoBuilder extends IncrementalProjectBuilder {
 		}
 
 		private void addMarker(SAXParseException e, int severity) {
-			IoBuilder.this.addMarker(file, e.getMessage(), e
-					.getLineNumber(), severity);
+			IoBuilder.this.addMarker(file, e.getMessage(), e.getLineNumber(),
+					severity);
 		}
 
 		public void error(SAXParseException exception) throws SAXException {
@@ -102,13 +99,9 @@ public class IoBuilder extends IncrementalProjectBuilder {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.core.internal.events.InternalBuilder#build(int,
-	 *      java.util.Map, org.eclipse.core.runtime.IProgressMonitor)
-	 */
-	protected IProject[] build(int kind, Map args, IProgressMonitor monitor)
+	@Override
+	protected IProject[] build(int kind,
+			@SuppressWarnings("rawtypes") Map args, IProgressMonitor monitor)
 			throws CoreException {
 		if (kind == FULL_BUILD) {
 			fullBuild(monitor);
@@ -123,10 +116,18 @@ public class IoBuilder extends IncrementalProjectBuilder {
 		return null;
 	}
 
-	void checkXML(IResource resource) {
-		if (resource instanceof IFile && resource.getName().endsWith(".xml")) {
+	void checkIo(IResource resource) {
+		if (resource instanceof IFile && resource.getName().endsWith(".io")) {
 			IFile file = (IFile) resource;
 			deleteMarkers(file);
+			try {
+				System.out.println("in");
+				execCommand(new String[]{"/usr/local/bin/io", file.getFullPath().toOSString()});
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 			XMLErrorHandler reporter = new XMLErrorHandler(file);
 			try {
 				getParser().parse(file.getContents(), reporter);
@@ -145,7 +146,7 @@ public class IoBuilder extends IncrementalProjectBuilder {
 	protected void fullBuild(final IProgressMonitor monitor)
 			throws CoreException {
 		try {
-			getProject().accept(new SampleResourceVisitor());
+			getProject().accept(new IoResourceVisitor());
 		} catch (CoreException e) {
 		}
 	}
@@ -160,7 +161,44 @@ public class IoBuilder extends IncrementalProjectBuilder {
 
 	protected void incrementalBuild(IResourceDelta delta,
 			IProgressMonitor monitor) throws CoreException {
-		// the visitor does the work.
-		delta.accept(new SampleDeltaVisitor());
+		delta.accept(new IoDeltaVisitor());
+	}
+
+	private String[] execCommand(String[] cmds) throws IOException,
+			InterruptedException {
+		String[] returns = new String[3];
+		String LINE_SEPA = System.getProperty("line.separator");
+		Runtime r = Runtime.getRuntime();
+		Process p = r.exec(cmds);
+		InputStream in = null;
+		BufferedReader br = null;
+		try {
+			in = p.getInputStream();
+			StringBuffer out = new StringBuffer();
+			br = new BufferedReader(new InputStreamReader(in));
+			String line;
+			while ((line = br.readLine()) != null) {
+				out.append(line + LINE_SEPA);
+			}
+			returns[0] = out.toString();
+			br.close();
+			in.close();
+			in = p.getErrorStream();
+			StringBuffer err = new StringBuffer();
+			br = new BufferedReader(new InputStreamReader(in));
+			while ((line = br.readLine()) != null) {
+				err.append(line + LINE_SEPA);
+			}
+			returns[1] = err.toString();
+			returns[2] = Integer.toString(p.waitFor());
+			return returns;
+		} finally {
+			if (br != null) {
+				br.close();
+			}
+			if (in != null) {
+				in.close();
+			}
+		}
 	}
 }
