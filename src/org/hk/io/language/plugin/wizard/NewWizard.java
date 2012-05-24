@@ -38,7 +38,6 @@ public class NewWizard extends Wizard implements INewWizard {
 			createNature(workspace, project);
 			createBuilder(project);
 		} catch (CoreException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return true;

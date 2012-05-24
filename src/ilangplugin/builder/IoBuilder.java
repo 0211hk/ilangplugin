@@ -6,10 +6,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Map;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
@@ -20,9 +16,7 @@ import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
-import org.xml.sax.helpers.DefaultHandler;
+import org.hk.io.language.plugin.util.SystemPropertyUtil;
 
 public class IoBuilder extends IncrementalProjectBuilder {
 
@@ -40,7 +34,6 @@ public class IoBuilder extends IncrementalProjectBuilder {
 				checkIo(resource);
 				break;
 			}
-			// return true to continue visiting children.
 			return true;
 		}
 	}
@@ -48,47 +41,18 @@ public class IoBuilder extends IncrementalProjectBuilder {
 	class IoResourceVisitor implements IResourceVisitor {
 		public boolean visit(IResource resource) {
 			checkIo(resource);
-			// return true to continue visiting children.
 			return true;
-		}
-	}
-
-	class XMLErrorHandler extends DefaultHandler {
-
-		private IFile file;
-
-		public XMLErrorHandler(IFile file) {
-			this.file = file;
-		}
-
-		private void addMarker(SAXParseException e, int severity) {
-			IoBuilder.this.addMarker(file, e.getMessage(), e.getLineNumber(),
-					severity);
-		}
-
-		public void error(SAXParseException exception) throws SAXException {
-			addMarker(exception, IMarker.SEVERITY_ERROR);
-		}
-
-		public void fatalError(SAXParseException exception) throws SAXException {
-			addMarker(exception, IMarker.SEVERITY_ERROR);
-		}
-
-		public void warning(SAXParseException exception) throws SAXException {
-			addMarker(exception, IMarker.SEVERITY_WARNING);
 		}
 	}
 
 	public static final String BUILDER_ID = "ilangplugin.IlanguageBuilder";
 
-	private static final String MARKER_TYPE = "ilangplugin.xmlProblem";
-
-	private SAXParserFactory parserFactory;
+	private final Parse p = new Parse();
 
 	private void addMarker(IFile file, String message, int lineNumber,
 			int severity) {
 		try {
-			IMarker marker = file.createMarker(MARKER_TYPE);
+			IMarker marker = file.createMarker(IMarker.PROBLEM);
 			marker.setAttribute(IMarker.MESSAGE, message);
 			marker.setAttribute(IMarker.SEVERITY, severity);
 			if (lineNumber == -1) {
@@ -120,25 +84,69 @@ public class IoBuilder extends IncrementalProjectBuilder {
 		if (resource instanceof IFile && resource.getName().endsWith(".io")) {
 			IFile file = (IFile) resource;
 			deleteMarkers(file);
+			p.clear();
 			try {
-				System.out.println("in");
-				execCommand(new String[]{"/usr/local/bin/io", file.getFullPath().toOSString()});
+				String[] returns = execCommand(new String[] {
+						"/usr/local/bin/io", file.getLocation().toOSString() });
+				p.parse(returns[0], file.getName());
+				if (p.isError) {
+					System.out.println(p.errorMessage);
+					addMarker(file, p.errorMessage, p.lineNumber,
+							IMarker.SEVERITY_ERROR);
+				}
 			} catch (IOException e) {
 				e.printStackTrace();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			XMLErrorHandler reporter = new XMLErrorHandler(file);
-			try {
-				getParser().parse(file.getContents(), reporter);
-			} catch (Exception e1) {
+		}
+	}
+
+	static class Parse {
+		private boolean isError = false;
+		private int lineNumber = 0;
+		private String errorMessage = "";
+
+		public boolean isError() {
+			return isError;
+		}
+
+		public void clear() {
+			isError = false;
+			lineNumber = 0;
+			errorMessage = "";
+		}
+
+		public void parse(final String message, final String fileName) {
+			if (message == null || message.length() == 0) {
+				isError = false;
+				return;
+			}
+			isError = true;
+			String[] messages = message.split(SystemPropertyUtil
+					.getLineSeparator());
+			if (messages.length != 0) {
+				this.errorMessage = messages[1];
+			}
+			for (String m : messages) {
+				int index = m.indexOf(fileName);
+				if (index != -1) {
+					String s = m.substring(index, m.length());
+					String[] str = s.split(" ");
+					if (str.length == 2) {
+						lineNumber = Integer.parseInt(str[1]);
+					}
+				}
+			}
+			if (lineNumber == 0) {
+				isError = false;
 			}
 		}
 	}
 
 	private void deleteMarkers(IFile file) {
 		try {
-			file.deleteMarkers(MARKER_TYPE, false, IResource.DEPTH_ZERO);
+			file.deleteMarkers(IMarker.PROBLEM, false, IResource.DEPTH_ZERO);
 		} catch (CoreException ce) {
 		}
 	}
@@ -151,14 +159,6 @@ public class IoBuilder extends IncrementalProjectBuilder {
 		}
 	}
 
-	private SAXParser getParser() throws ParserConfigurationException,
-			SAXException {
-		if (parserFactory == null) {
-			parserFactory = SAXParserFactory.newInstance();
-		}
-		return parserFactory.newSAXParser();
-	}
-
 	protected void incrementalBuild(IResourceDelta delta,
 			IProgressMonitor monitor) throws CoreException {
 		delta.accept(new IoDeltaVisitor());
@@ -167,7 +167,6 @@ public class IoBuilder extends IncrementalProjectBuilder {
 	private String[] execCommand(String[] cmds) throws IOException,
 			InterruptedException {
 		String[] returns = new String[3];
-		String LINE_SEPA = System.getProperty("line.separator");
 		Runtime r = Runtime.getRuntime();
 		Process p = r.exec(cmds);
 		InputStream in = null;
@@ -178,7 +177,7 @@ public class IoBuilder extends IncrementalProjectBuilder {
 			br = new BufferedReader(new InputStreamReader(in));
 			String line;
 			while ((line = br.readLine()) != null) {
-				out.append(line + LINE_SEPA);
+				out.append(line + SystemPropertyUtil.getLineSeparator());
 			}
 			returns[0] = out.toString();
 			br.close();
@@ -187,7 +186,7 @@ public class IoBuilder extends IncrementalProjectBuilder {
 			StringBuffer err = new StringBuffer();
 			br = new BufferedReader(new InputStreamReader(in));
 			while ((line = br.readLine()) != null) {
-				err.append(line + LINE_SEPA);
+				err.append(line + SystemPropertyUtil.getLineSeparator());
 			}
 			returns[1] = err.toString();
 			returns[2] = Integer.toString(p.waitFor());
