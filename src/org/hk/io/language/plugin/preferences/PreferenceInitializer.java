@@ -7,13 +7,9 @@ import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
  */
 public class PreferenceInitializer extends AbstractPreferenceInitializer {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer#initializeDefaultPreferences()
-	 */
-	@Override
-	public void initializeDefaultPreferences() {
-	}
+    @Override
+    public void initializeDefaultPreferences() {
+
+    }
 
 }

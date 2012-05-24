@@ -5,14 +5,22 @@ import java.util.ArrayList;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public final class Arrays {
-	
-	public static <T> ArrayList<T> newArrayList(){
-		return new ArrayList<T>();
-	}
-	
-	public static <T> CopyOnWriteArrayList<T> newCopyOnWriteArrayList(){
-		return new CopyOnWriteArrayList<T>();
-	}
+
+    public static <T> T[] push(T[] src, T elem, Class<T> c) {
+        @SuppressWarnings("unchecked")
+        T[] dest = (T[]) Array.newInstance(c, src.length + 1);
+        System.arraycopy(src, 0, dest, 0, src.length);
+        dest[src.length] = elem;
+        return dest;
+    }
+
+    public static <T> ArrayList<T> newArrayList() {
+        return new ArrayList<T>();
+    }
+
+    public static <T> CopyOnWriteArrayList<T> newCopyOnWriteArrayList() {
+        return new CopyOnWriteArrayList<T>();
+    }
 
     public static <T> boolean isEmpty(T... anArray) {
         return isNotEmpty(anArray) == false;
