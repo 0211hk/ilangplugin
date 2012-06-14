@@ -53,6 +53,7 @@ public class IoBuilder extends IncrementalProjectBuilder {
     private void addMarker(IFile file, String message, int lineNumber, int severity) {
         try {
             IMarker marker = file.createMarker(IMarker.PROBLEM);
+            System.out.println(message);
             marker.setAttribute(IMarker.MESSAGE, message);
             marker.setAttribute(IMarker.SEVERITY, severity);
             if (lineNumber == -1) {
@@ -120,8 +121,10 @@ public class IoBuilder extends IncrementalProjectBuilder {
             isError = true;
             String[] messages = message.split(SystemPropertyUtil.getLineSeparator());
             if (messages.length > 3) {
-                if (messages[0].length() == 0 && messages[1].indexOf("Exception: ") != -1 && messages[2].indexOf("---------") != -1) {
+                if (messages[0] != null && messages[1].indexOf("Exception: ") != -1 && messages[2].indexOf("---------") != -1) {
                     this.errorMessage = messages[1];
+                    // TODO: message[0] is not blank add IMaker.CHAR_START and
+                    // IMaker.CHAR_END
                 }
             }
             for (String m : messages) {

@@ -69,15 +69,6 @@
       </objectContribution>
    </extension>
    <extension
-         point="org.eclipse.ui.newWizards">
-      <wizard
-            class="org.hk.io.language.plugin.wizard.NewWizard"
-            icon="icons/io_obj.gif"
-            id="org.hk.io.language.plugin.wizard"
-            name="io">
-      </wizard>
-   </extension>
-   <extension
          point="org.eclipse.debug.core.launchDelegates">
       <launchDelegate
             delegate="org.hk.io.language.plugin.launcher.IoLauncher"
