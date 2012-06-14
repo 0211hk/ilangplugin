@@ -61,6 +61,7 @@
          <action
                class="ilangplugin.builder.ToggleNatureAction"
                enablesFor="+"
+               icon="icons/io_obj.gif"
                id="ilangplugin.addRemoveNatureAction"
                label="Add/Remove Sample Nature"
                menubarPath="additions">
@@ -68,23 +69,63 @@
       </objectContribution>
    </extension>
    <extension
-         id="xmlProblem"
-         name="XML Problem"
-         point="org.eclipse.core.resources.markers">
-      <super
-            type="org.eclipse.core.resources.problemmarker">
-      </super>
-      <persistent
-            value="true">
-      </persistent>
-   </extension>
-   <extension
          point="org.eclipse.ui.newWizards">
       <wizard
             class="org.hk.io.language.plugin.wizard.NewWizard"
+            icon="icons/io_obj.gif"
             id="org.hk.io.language.plugin.wizard"
             name="io">
       </wizard>
    </extension>
-
+   <extension
+         point="org.eclipse.debug.core.launchDelegates">
+      <launchDelegate
+            delegate="org.hk.io.language.plugin.launcher.IoLauncher"
+            id="ilangplugin.launchDelegate"
+            modes="run"
+            name="Io Application">
+      </launchDelegate>
+   </extension>
+   <extension
+         point="org.eclipse.debug.core.launchConfigurationTypes">
+      <launchConfigurationType
+            delegate="org.hk.io.language.plugin.launcher.IoLauncher"
+            id="ilangplugin.launchConfigurationType"
+            modes="run"
+            name="Io Application"
+            sourceLocatorId="org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector"
+            sourcePathComputerId="org.eclipse.jdt.launching.sourceLookup.javaSourcePathComputer">
+      </launchConfigurationType>
+   </extension>
+   <extension point="org.eclipse.debug.ui.launchConfigurationTabGroups">
+	<launchConfigurationTabGroup
+          class="org.hk.io.language.plugin.launcher.IoLauncherTabGroups"
+          description="This is the configuration tab group of the DemoLauncher"
+          id="ilangplugin.launchConfigurationTabGroup"
+          type="ilangplugin.launchConfigurationType">
+    </launchConfigurationTabGroup>
+	</extension>
+   <extension
+         point="org.eclipse.debug.ui.launchShortcuts">
+      <shortcut
+            class="org.hk.io.language.plugin.launcher.IoLauncherShortcut"
+            id="ilangplugin.shortcut"
+            label="Io Application"
+            icon="icons/io_obj.gif"
+            modes="run">
+            <contextualLaunch>
+            <enablement>
+               <with variable="selection">
+                  <count value="1"/>
+                  <iterate>
+                     <instanceof value="org.eclipse.core.resources.IFile"/>
+                     <test
+                           value="*.io"
+                           property="org.eclipse.debug.ui.matchesPattern"/>
+                  </iterate>
+               </with>
+            </enablement>
+        </contextualLaunch>
+      </shortcut>
+   </extension>
 </plugin>

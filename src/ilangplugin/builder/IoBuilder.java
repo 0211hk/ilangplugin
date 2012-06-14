@@ -91,7 +91,7 @@ public class IoBuilder extends IncrementalProjectBuilder {
                     addMarker(file, p.errorMessage, p.lineNumber, IMarker.SEVERITY_ERROR);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Activator.logException(e);
                 addMarker(file, e.getMessage(), 1, IMarker.SEVERITY_ERROR);
             }
         }
@@ -119,8 +119,10 @@ public class IoBuilder extends IncrementalProjectBuilder {
             }
             isError = true;
             String[] messages = message.split(SystemPropertyUtil.getLineSeparator());
-            if (messages.length != 0) {
-                this.errorMessage = messages[1];
+            if (messages.length > 3) {
+                if (messages[0].length() == 0 && messages[1].indexOf("Exception: ") != -1 && messages[2].indexOf("---------") != -1) {
+                    this.errorMessage = messages[1];
+                }
             }
             for (String m : messages) {
                 int index = m.indexOf(fileName);
