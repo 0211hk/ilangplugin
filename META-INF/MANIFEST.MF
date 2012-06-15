@@ -1,8 +1,8 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Ilangplugin
-Bundle-SymbolicName: ilangplugin; singleton:=true
-Bundle-Version: 1.0.0.qualifier
+Bundle-SymbolicName: org.hk.plugin.ilangplugin;singleton:=true
+Bundle-Version: 0.0.1
 Bundle-Activator: ilangplugin.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
@@ -14,3 +14,4 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.debug.ui;bundle-version="3.7.102"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-Vendor: ProjectIlangPlugin

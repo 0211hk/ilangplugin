@@ -48,7 +48,7 @@
          </run>
       </runtime>
       <builder
-            id="ilangplugin.IlanguageBuilder">
+            id="IlanguageBuilder">
       </builder>
    </extension>
    <extension
