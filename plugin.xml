@@ -28,7 +28,7 @@
       </initializer>
    </extension>
    <extension
-         id="IlanguageBuilder"
+         id="ilangplugin.IlanguageBuilder"
          name="Io Project Builder"
          point="org.eclipse.core.resources.builders">
       <builder
@@ -39,7 +39,7 @@
       </builder>
    </extension>
    <extension
-         id="IlanguageNature"
+         id="ilangplugin.IlanguageNature"
          name="io Project Nature"
          point="org.eclipse.core.resources.natures">
       <runtime>
@@ -48,7 +48,7 @@
          </run>
       </runtime>
       <builder
-            id="IlanguageBuilder">
+            id="ilangplugin.IlanguageBuilder">
       </builder>
    </extension>
    <extension
@@ -67,6 +67,26 @@
                menubarPath="additions">
          </action>
       </objectContribution>
+   </extension>
+   <extension 
+   			id="ioProblem"
+			name="IO Problem"
+			point="org.eclipse.core.resources.markers">
+	<super
+		type="org.eclipse.core.resources.problemmarker">
+	</super>
+	<persistent
+		value="true">
+	</persistent>
+	</extension>
+   <extension
+    	point="org.eclipse.ui.newWizards">
+    	<wizard
+    		class="org.hk.io.language.plugin.wizard.NewWizard"
+    		icon="icons/io_obj.gif"
+    		id="org.hk.io.language.plugin.wizard"
+    		name="io">
+    	</wizard>
    </extension>
    <extension
          point="org.eclipse.debug.core.launchDelegates">
